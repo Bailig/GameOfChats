@@ -19,9 +19,23 @@ class ViewController: UITableViewController {
         ref = FIRDatabase.database().reference()
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(handleLogout))
+        
+        // user is not logged in
+        if FIRAuth.auth()?.currentUser?.uid == nil {
+            // call handleLogout function after 0
+            perform(#selector(handleLogout), with: nil, afterDelay: 0)
+            handleLogout()
+        }
     }
     
     func handleLogout() {
+        
+        do {
+            try FIRAuth.auth()?.signOut()
+        } catch let error {
+            print("error: \(error.localizedDescription)")
+        }
+        
         let loginController = LoginController()
         present(loginController, animated: true, completion: nil)
     }
