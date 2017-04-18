@@ -19,6 +19,40 @@ extension LoginController: UIImagePickerControllerDelegate, UINavigationControll
         present(picker, animated: true, completion: nil)
     }
     
+    func handleLoginRegister() {
+        switch loginRegisterSegmentedControl.selectedSegmentIndex {
+        case 0:
+            handleLogin()
+        case 1:
+            handleRegistor()
+        default:
+            break
+        }
+    }
+    
+    func handleLogin() {
+        guard let email = emailTextFiled.text, let password = passwordTextFiled.text else {
+            print("error: unable to fetch email or password!")
+            return
+        }
+        FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (user: FIRUser?, error) in
+            if let error = error {
+                print("error: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let uid = user?.uid else {
+                print("error: unable to fetch user uid!")
+                return
+            }
+            
+            self.uid = uid
+            self.delegate?.fetchUserAndSetNavBarTitle(withUid: uid)
+            
+            self.dismiss(animated: true, completion: nil)
+        })
+    }
+    
     func handleRegistor() {
         guard let email = emailTextFiled.text, let password = passwordTextFiled.text, let name = nameTextFiled.text else {
             print("error: unable to fetch email or password!")
@@ -67,7 +101,8 @@ extension LoginController: UIImagePickerControllerDelegate, UINavigationControll
             }
             let user = User()
             user.setValuesForKeys(values)
-            self.messagesController?.setNavBar(withUser: user)
+            
+            self.delegate?.setNavBar(withUser: user)
             self.dismiss(animated: true, completion: nil)
         })
     }

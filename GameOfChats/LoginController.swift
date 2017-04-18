@@ -9,10 +9,18 @@
 import UIKit
 import Firebase
 
-class LoginController: UIViewController {
+protocol LoginControllerDelegate: class {
+    func fetchUserAndSetNavBarTitle(withUid uid: String)
+    func setNavBar(withUser user: User)
+}
 
-    var messagesController: MessagesController?
+
+class LoginController: UIViewController {
     
+    var uid: String?
+    weak var delegate: LoginControllerDelegate?
+    
+    // MARK: - UI
     // create container view for inputs
     let inputsContainerView: UIView = {
         let view = UIView()
@@ -34,39 +42,6 @@ class LoginController: UIViewController {
         button.addTarget(self, action: #selector(handleLoginRegister), for: .touchUpInside)
         return button
     }()
-    
-    func handleLoginRegister() {
-        switch loginRegisterSegmentedControl.selectedSegmentIndex {
-        case 0:
-            handleLogin()
-        case 1:
-            handleRegistor()
-        default:
-            break
-        }
-    }
-    
-    func handleLogin() {
-        guard let email = emailTextFiled.text, let password = passwordTextFiled.text else {
-            print("error: unable to fetch email or password!")
-            return
-        }
-        FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (user: FIRUser?, error) in
-            if let error = error {
-                print("error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let _ = user?.uid else {
-                print("error: unable to fetch user uid!")
-                return
-            }
-            
-            self.messagesController?.fetchUserAndSetNavBarTitle()
-            self.dismiss(animated: true, completion: nil)
-        })
-    }
-    
     
     let nameTextFiled: UITextField = {
         let tf = UITextField()
@@ -125,6 +100,26 @@ class LoginController: UIViewController {
         return sc
     }()
     
+    // MARK: - view did load
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = UIColor(r: 61, g: 91, b: 151)
+        
+        // add views
+        view.addSubview(loginRegisterButton)
+        view.addSubview(inputsContainerView)
+        view.addSubview(profileImageView)
+        view.addSubview(loginRegisterSegmentedControl)
+        
+        // setup views
+        setupInputsContainerView()
+        setupLoginRegisterButton()
+        setupProfileImageView()
+        setupLoginRegisterSegmentedControl()
+    }
+    
+    // MARK: - handle UI changes
     func handleLoginRegisterChange() {
         let title = loginRegisterSegmentedControl.titleForSegment(at: loginRegisterSegmentedControl.selectedSegmentIndex)
         loginRegisterButton.setTitle(title, for: .normal)
@@ -147,7 +142,7 @@ class LoginController: UIViewController {
             
             // change height of passwordTextFiled
             passwordTextFiledHeightAncher = passwordTextFiled.heightAnchor.constraint(equalTo: inputsContainerView.heightAnchor, multiplier: 1/2)
-
+            
         case 1:
             // change height of inputsContainerView
             inputsContainerViewHeightAnchor?.constant = 150
@@ -170,23 +165,8 @@ class LoginController: UIViewController {
         nameTextFieldHeightAncher?.isActive = true
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        view.backgroundColor = UIColor(r: 61, g: 91, b: 151)
-        
-        // add views
-        view.addSubview(loginRegisterButton)
-        view.addSubview(inputsContainerView)
-        view.addSubview(profileImageView)
-        view.addSubview(loginRegisterSegmentedControl)
-        
-        // setup views
-        setupInputsContainerView()
-        setupLoginRegisterButton()
-        setupProfileImageView()
-        setupLoginRegisterSegmentedControl()
-    }
+    
+    // MARK: - setup UI
     
     func setupLoginRegisterSegmentedControl() {
         loginRegisterSegmentedControl.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
@@ -194,7 +174,6 @@ class LoginController: UIViewController {
         loginRegisterSegmentedControl.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor).isActive = true
         loginRegisterSegmentedControl.heightAnchor.constraint(equalToConstant: 36).isActive = true
     }
-    
     
     var inputsContainerViewHeightAnchor: NSLayoutConstraint?
     var nameTextFieldHeightAncher: NSLayoutConstraint?
@@ -276,6 +255,7 @@ class LoginController: UIViewController {
         profileImageView.heightAnchor.constraint(equalTo: profileImageView.widthAnchor).isActive = true
     }
 
+    // MARK: - others
     override var preferredStatusBarStyle: UIStatusBarStyle {
         // set status bar elements, like battery icon, with white border rather then black.
         return .lightContent

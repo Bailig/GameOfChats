@@ -15,6 +15,7 @@ class NewMessageController: UITableViewController {
     var ref: FIRDatabaseReference?
     var users = [User]()
     
+    // MARK: - view did load
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -45,6 +46,7 @@ class NewMessageController: UITableViewController {
         })
     }
     
+    // MARK: - handlers
     func handleCancel() {
         dismiss(animated: true, completion: nil)
     }

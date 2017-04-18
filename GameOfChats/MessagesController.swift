@@ -9,10 +9,11 @@
 import UIKit
 import Firebase
 
-class MessagesController: UITableViewController {
+class MessagesController: UITableViewController, LoginControllerDelegate {
 
     var ref: FIRDatabaseReference?
     
+    // MARK: - view did load
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -24,37 +25,25 @@ class MessagesController: UITableViewController {
         checkIfUserIsLogedIn()
     }
     
-    func handleNewMessage() {
-        let newMessageController = NewMessageController()
-        let navController = UINavigationController(rootViewController: newMessageController)
-        present(navController, animated: true, completion: nil)
-    }
-    
-    func isUserLogedIn() -> Bool {
-        if FIRAuth.auth()?.currentUser?.uid == nil {
-            return false
-        }
-        return true
-    }
-    
     func checkIfUserIsLogedIn() {
-        if FIRAuth.auth()?.currentUser?.uid != nil {
-            fetchUserAndSetNavBarTitle()
+        if let uid = FIRAuth.auth()?.currentUser?.uid {
+            fetchUserAndSetNavBarTitle(withUid: uid)
         } else {
             // call handleLogout function after 0 second to present the login view
             perform(#selector(handleLogout), with: nil, afterDelay: 0)
             handleLogout()
         }
+        
     }
     
-    func fetchUserAndSetNavBarTitle() {
-        guard let uid = FIRAuth.auth()?.currentUser?.uid, let ref = ref else {
-            print("error: unexpected nil for ref: FIRDatabaseReference!")
+    func fetchUserAndSetNavBarTitle(withUid uid: String) {
+        guard let ref = ref else {
+            print("error: unexpected nil for ref: FIRDatabaseReference")
             return
         }
         ref.child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot: FIRDataSnapshot) in
             guard let dictionary = snapshot.value as? [String: Any] else {
-                print("error: unable to fetch user's name")
+                print("error: unable to fetch user's name!")
                 return
             }
             
@@ -67,6 +56,8 @@ class MessagesController: UITableViewController {
         }
     }
     
+    // MARK: - setup UI
+
     func setNavBar(withUser user: User) {
         let titleView = UIView()
         titleView.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
@@ -107,6 +98,16 @@ class MessagesController: UITableViewController {
         containerView.centerYAnchor.constraint(equalTo: titleView.centerYAnchor).isActive = true
         
         self.navigationItem.titleView = titleView
+        
+        titleView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleChatLog)))
+    }
+    
+    
+    // MARK: - handlers
+    func handleNewMessage() {
+        let newMessageController = NewMessageController()
+        let navController = UINavigationController(rootViewController: newMessageController)
+        present(navController, animated: true, completion: nil)
     }
     
     func handleLogout() {
@@ -117,10 +118,17 @@ class MessagesController: UITableViewController {
             print("error: \(error.localizedDescription)")
         }
         
+        // present loginController
         let loginController = LoginController()
-        loginController.messagesController = self
+        loginController.delegate = self
         present(loginController, animated: true, completion: nil)
     }
+    
+    func handleChatLog() {
+        let chatLogController = ChatLogController(collectionViewLayout: UICollectionViewFlowLayout())
+        navigationController?.pushViewController(chatLogController, animated: true)
+    }
 }
+
 
 
