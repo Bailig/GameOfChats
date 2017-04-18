@@ -8,25 +8,33 @@
 
 /* Begin PBXBuildFile section */
 		0251AF721EA328F900C201B0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF711EA328F900C201B0 /* AppDelegate.swift */; };
-		0251AF741EA328F900C201B0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF731EA328F900C201B0 /* ViewController.swift */; };
+		0251AF741EA328F900C201B0 /* MessagesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF731EA328F900C201B0 /* MessagesController.swift */; };
 		0251AF791EA328F900C201B0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0251AF781EA328F900C201B0 /* Assets.xcassets */; };
 		0251AF7C1EA328F900C201B0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0251AF7A1EA328F900C201B0 /* LaunchScreen.storyboard */; };
 		0251AF851EA32BAF00C201B0 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF841EA32BAF00C201B0 /* LoginController.swift */; };
 		0251AF881EA32F3800C201B0 /* UIColor+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF871EA32F3800C201B0 /* UIColor+Ext.swift */; };
+		028523E71EA5A208003DFA34 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028523E61EA5A208003DFA34 /* Extensions.swift */; };
 		02B9318E1EA4468600990FF2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 02B9318D1EA4468600990FF2 /* GoogleService-Info.plist */; };
+		02F62A5C1EA5590500677134 /* NewMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F62A5B1EA5590500677134 /* NewMessageController.swift */; };
+		02F62A5F1EA55D7800677134 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F62A5E1EA55D7800677134 /* User.swift */; };
+		02F62A621EA5745600677134 /* LoginController+Handlers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F62A611EA5745600677134 /* LoginController+Handlers.swift */; };
 		24FDFA4BD6037377ED084EF1 /* Pods_GameOfChats.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D02D65543ABC0D601BF2A71 /* Pods_GameOfChats.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0251AF6E1EA328F900C201B0 /* GameOfChats.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GameOfChats.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0251AF711EA328F900C201B0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0251AF731EA328F900C201B0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		0251AF731EA328F900C201B0 /* MessagesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesController.swift; sourceTree = "<group>"; };
 		0251AF781EA328F900C201B0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0251AF7B1EA328F900C201B0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0251AF7D1EA328F900C201B0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0251AF841EA32BAF00C201B0 /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		0251AF871EA32F3800C201B0 /* UIColor+Ext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+Ext.swift"; sourceTree = "<group>"; };
+		028523E61EA5A208003DFA34 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		02B9318D1EA4468600990FF2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		02F62A5B1EA5590500677134 /* NewMessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewMessageController.swift; sourceTree = "<group>"; };
+		02F62A5E1EA55D7800677134 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		02F62A611EA5745600677134 /* LoginController+Handlers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "LoginController+Handlers.swift"; sourceTree = "<group>"; };
 		1D02D65543ABC0D601BF2A71 /* Pods_GameOfChats.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GameOfChats.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE0619F27D034E05FBB48C05 /* Pods-GameOfChats.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GameOfChats.debug.xcconfig"; path = "Pods/Target Support Files/Pods-GameOfChats/Pods-GameOfChats.debug.xcconfig"; sourceTree = "<group>"; };
 		EC4A230DA3893222E4B45886 /* Pods-GameOfChats.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GameOfChats.release.xcconfig"; path = "Pods/Target Support Files/Pods-GameOfChats/Pods-GameOfChats.release.xcconfig"; sourceTree = "<group>"; };
@@ -65,6 +73,8 @@
 		0251AF701EA328F900C201B0 /* GameOfChats */ = {
 			isa = PBXGroup;
 			children = (
+				028523E51EA5A1F3003DFA34 /* Helper */,
+				02F62A5D1EA55D6900677134 /* Model */,
 				0251AF861EA32F1500C201B0 /* Extension */,
 				0251AF831EA32B8F00C201B0 /* Controller */,
 				0251AF711EA328F900C201B0 /* AppDelegate.swift */,
@@ -80,7 +90,9 @@
 			isa = PBXGroup;
 			children = (
 				0251AF841EA32BAF00C201B0 /* LoginController.swift */,
-				0251AF731EA328F900C201B0 /* ViewController.swift */,
+				02F62A611EA5745600677134 /* LoginController+Handlers.swift */,
+				0251AF731EA328F900C201B0 /* MessagesController.swift */,
+				02F62A5B1EA5590500677134 /* NewMessageController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -91,6 +103,22 @@
 				0251AF871EA32F3800C201B0 /* UIColor+Ext.swift */,
 			);
 			name = Extension;
+			sourceTree = "<group>";
+		};
+		028523E51EA5A1F3003DFA34 /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				028523E61EA5A208003DFA34 /* Extensions.swift */,
+			);
+			name = Helper;
+			sourceTree = "<group>";
+		};
+		02F62A5D1EA55D6900677134 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				02F62A5E1EA55D7800677134 /* User.swift */,
+			);
+			name = Model;
 			sourceTree = "<group>";
 		};
 		7180854E683D8B4A363F48F0 /* Pods */ = {
@@ -234,7 +262,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0251AF741EA328F900C201B0 /* ViewController.swift in Sources */,
+				0251AF741EA328F900C201B0 /* MessagesController.swift in Sources */,
+				02F62A621EA5745600677134 /* LoginController+Handlers.swift in Sources */,
+				02F62A5C1EA5590500677134 /* NewMessageController.swift in Sources */,
+				028523E71EA5A208003DFA34 /* Extensions.swift in Sources */,
+				02F62A5F1EA55D7800677134 /* User.swift in Sources */,
 				0251AF881EA32F3800C201B0 /* UIColor+Ext.swift in Sources */,
 				0251AF851EA32BAF00C201B0 /* LoginController.swift in Sources */,
 				0251AF721EA328F900C201B0 /* AppDelegate.swift in Sources */,

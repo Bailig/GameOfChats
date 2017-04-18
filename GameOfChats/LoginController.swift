@@ -11,6 +11,7 @@ import Firebase
 
 class LoginController: UIViewController {
 
+    var messagesController: MessagesController?
     
     // create container view for inputs
     let inputsContainerView: UIView = {
@@ -33,6 +34,7 @@ class LoginController: UIViewController {
         button.addTarget(self, action: #selector(handleLoginRegister), for: .touchUpInside)
         return button
     }()
+    
     func handleLoginRegister() {
         switch loginRegisterSegmentedControl.selectedSegmentIndex {
         case 0:
@@ -46,7 +48,7 @@ class LoginController: UIViewController {
     
     func handleLogin() {
         guard let email = emailTextFiled.text, let password = passwordTextFiled.text else {
-            print("error: unable to get email or password!")
+            print("error: unable to fetch email or password!")
             return
         }
         FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (user: FIRUser?, error) in
@@ -55,39 +57,16 @@ class LoginController: UIViewController {
                 return
             }
             
-            guard let uid = user?.uid else {
-                print("error: unable to get user uid!")
+            guard let _ = user?.uid else {
+                print("error: unable to fetch user uid!")
                 return
             }
+            
+            self.messagesController?.fetchUserAndSetNavBarTitle()
             self.dismiss(animated: true, completion: nil)
         })
     }
-    func handleRegistor() {
-        guard let email = emailTextFiled.text, let password = passwordTextFiled.text, let name = nameTextFiled.text else {
-            print("error: unable to get email or password!")
-            return
-        }
-        FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: { (user: FIRUser?, error) in
-            if let error = error {
-                print("error: \(error.localizedDescription)")
-                return
-            }
-            guard let uid = user?.uid else {
-                print("error: unable to fetch the user!")
-                return
-            }
-            let ref = FIRDatabase.database().reference()
-            let userRef = ref.child("users").child(uid)
-            let values = ["name": name, "email": email]
-            userRef.updateChildValues(values, withCompletionBlock: { (error, ref: FIRDatabaseReference) in
-                if let error = error {
-                    print("error: \(error.localizedDescription)")
-                    return
-                }
-                self.dismiss(animated: true, completion: nil)
-            })
-        })
-    }
+    
     
     let nameTextFiled: UITextField = {
         let tf = UITextField()
@@ -125,11 +104,14 @@ class LoginController: UIViewController {
         return tf
     }()
     
-    let profileImageView: UIImageView = {
+    lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.image = UIImage(named: "gameofthrones_splash")
         imageView.contentMode = .scaleAspectFill
+        
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleSelectProfileImage)))
+        imageView.isUserInteractionEnabled = true
         return imageView
     }()
     
