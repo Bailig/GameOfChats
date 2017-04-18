@@ -12,6 +12,11 @@ import Firebase
 class ChatLogController: UICollectionViewController, UITextFieldDelegate {
     
     var ref: FIRDatabaseReference?
+    var toUser: User? {
+        didSet {
+            navigationItem.title = toUser?.name
+        }
+    }
     
     // MARK: - UI
     let inputsContainerView: UIView = {
@@ -103,9 +108,11 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate {
             print("error: unexpected nil for ref: FIRDatabaseReference")
             return
         }
-        
+        let fromUid = FIRAuth.auth()?.currentUser?.uid ?? ""
+        let toUid = toUser?.id ?? ""
         let messagesChildRef = ref.child("messages").childByAutoId()
-        let values = ["text": text]
+        let timestamp = Double(NSDate().timeIntervalSince1970)
+        let values = ["text": text, "fromUid": fromUid, "toUid": toUid, "timestamp": timestamp] as [String : Any]
         messagesChildRef.updateChildValues(values)
     }
     

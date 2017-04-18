@@ -16,6 +16,7 @@
 		0269D6DE1EA6A69D00214DE7 /* ChatLogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0269D6DD1EA6A69D00214DE7 /* ChatLogController.swift */; };
 		028523E71EA5A208003DFA34 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028523E61EA5A208003DFA34 /* Extensions.swift */; };
 		02B9318E1EA4468600990FF2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 02B9318D1EA4468600990FF2 /* GoogleService-Info.plist */; };
+		02C0AE721EA6CD47001B10EE /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C0AE711EA6CD47001B10EE /* Message.swift */; };
 		02F62A5C1EA5590500677134 /* NewMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F62A5B1EA5590500677134 /* NewMessageController.swift */; };
 		02F62A5F1EA55D7800677134 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F62A5E1EA55D7800677134 /* User.swift */; };
 		02F62A621EA5745600677134 /* LoginController+Handlers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F62A611EA5745600677134 /* LoginController+Handlers.swift */; };
@@ -34,6 +35,7 @@
 		0269D6DD1EA6A69D00214DE7 /* ChatLogController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatLogController.swift; sourceTree = "<group>"; };
 		028523E61EA5A208003DFA34 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		02B9318D1EA4468600990FF2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		02C0AE711EA6CD47001B10EE /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		02F62A5B1EA5590500677134 /* NewMessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewMessageController.swift; sourceTree = "<group>"; };
 		02F62A5E1EA55D7800677134 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		02F62A611EA5745600677134 /* LoginController+Handlers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "LoginController+Handlers.swift"; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				02F62A5E1EA55D7800677134 /* User.swift */,
+				02C0AE711EA6CD47001B10EE /* Message.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -272,6 +275,7 @@
 				028523E71EA5A208003DFA34 /* Extensions.swift in Sources */,
 				02F62A5F1EA55D7800677134 /* User.swift in Sources */,
 				0251AF881EA32F3800C201B0 /* UIColor+Ext.swift in Sources */,
+				02C0AE721EA6CD47001B10EE /* Message.swift in Sources */,
 				0251AF851EA32BAF00C201B0 /* LoginController.swift in Sources */,
 				0251AF721EA328F900C201B0 /* AppDelegate.swift in Sources */,
 			);

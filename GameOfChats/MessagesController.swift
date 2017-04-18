@@ -9,9 +9,10 @@
 import UIKit
 import Firebase
 
-class MessagesController: UITableViewController, LoginControllerDelegate {
+class MessagesController: UITableViewController, LoginControllerDelegate, NewMessageControllerDelegate {
 
     var ref: FIRDatabaseReference?
+    var messages = [Message]()
     
     // MARK: - view did load
     override func viewDidLoad() {
@@ -23,6 +24,32 @@ class MessagesController: UITableViewController, LoginControllerDelegate {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(handleNewMessage))
         
         checkIfUserIsLogedIn()
+        
+        observeMessage()
+    }
+    
+    func observeMessage() {
+        guard let ref = ref else {
+            print("error: unexpected nil for ref: FIRDatabaseReference")
+            return
+        }
+        
+        ref.child("messages").observe(.childAdded, with: { (snapshot) in
+            guard let dictionary = snapshot.value as? [String: Any] else {
+                print("error: unable to fetch message!")
+                return
+            }
+            let message = Message()
+            message.setValuesForKeys(dictionary)
+            self.messages.append(message)
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }) { (error) in
+            print("error: \(error.localizedDescription)")
+        }
+        
     }
     
     func checkIfUserIsLogedIn() {
@@ -106,6 +133,7 @@ class MessagesController: UITableViewController, LoginControllerDelegate {
     // MARK: - handlers
     func handleNewMessage() {
         let newMessageController = NewMessageController()
+        newMessageController.delegate = self
         let navController = UINavigationController(rootViewController: newMessageController)
         present(navController, animated: true, completion: nil)
     }
@@ -124,10 +152,27 @@ class MessagesController: UITableViewController, LoginControllerDelegate {
         present(loginController, animated: true, completion: nil)
     }
     
-    func handleChatLog() {
+    func handleChatLog(forSelectedUser user: User) {
         let chatLogController = ChatLogController(collectionViewLayout: UICollectionViewFlowLayout())
+        chatLogController.toUser = user
         navigationController?.pushViewController(chatLogController, animated: true)
     }
+    
+    // MARK: - setup table view
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        return UITableViewCell()
+    }
+    
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return messages.count
+    }
+    
+    
 }
 
 

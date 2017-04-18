@@ -9,11 +9,16 @@
 import UIKit
 import Firebase
 
+protocol NewMessageControllerDelegate: class {
+    func handleChatLog(forSelectedUser user: User)
+}
+
 class NewMessageController: UITableViewController {
 
     let cellId = "cellId"
     var ref: FIRDatabaseReference?
     var users = [User]()
+    weak var delegate: NewMessageControllerDelegate?
     
     // MARK: - view did load
     override func viewDidLoad() {
@@ -25,15 +30,16 @@ class NewMessageController: UITableViewController {
         
         tableView.register(UserCell.self, forCellReuseIdentifier: cellId)
         
-        fetchUser()
+        fetchAllUsers()
     }
     
-    func fetchUser() {
+    func fetchAllUsers() {
         ref?.child("users").observe(.childAdded, with: { (snapshot) in
             guard let dictionary = snapshot.value as? [String: Any] else {
                 return
             }
             let user = User()
+            user.id = snapshot.key
             user.setValuesForKeys(dictionary)
             self.users.append(user)
             
@@ -49,6 +55,13 @@ class NewMessageController: UITableViewController {
     // MARK: - handlers
     func handleCancel() {
         dismiss(animated: true, completion: nil)
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedUser = users[indexPath.row]
+        dismiss(animated: true) {
+            self.delegate?.handleChatLog(forSelectedUser: selectedUser)
+        }
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

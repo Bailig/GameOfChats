@@ -8,7 +8,8 @@
 
 import UIKit
 class User: NSObject {
-    private(set) var name: String?
-    private(set) var email: String?
-    private(set) var profileImageUrl: String?
+    var id: String?
+    var name: String?
+    var email: String?
+    var profileImageUrl: String?
 }
