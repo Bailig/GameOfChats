@@ -180,13 +180,32 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         present(loginController, animated: true, completion: nil)
     }
     
-    func handleChatLog(forSelectedUser user: User) {
+    func handleChatLog(forChatPartnerUser user: User) {
         let chatLogController = ChatLogController(collectionViewLayout: UICollectionViewFlowLayout())
-        chatLogController.toUser = user
+        chatLogController.chatPartnerUser = user
         navigationController?.pushViewController(chatLogController, animated: true)
     }
     
     // MARK: - setup table view
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let message = messages[indexPath.row]
+        guard let chatPartnerId = message.chatPartnerId() else { return }
+        
+        let chatPartnerRef = ref?.child("users").child(chatPartnerId)
+        chatPartnerRef?.observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            guard let dictionary = snapshot.value as? [String: Any] else { return }
+            
+            let chatPartnerUser = User()
+            chatPartnerUser.id = chatPartnerId
+            chatPartnerUser.setValuesForKeys(dictionary)
+            self.handleChatLog(forChatPartnerUser: chatPartnerUser)
+            
+        }, withCancel: { (error) in
+            print("error: \(error.localizedDescription)")
+        })
+    }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as? UserCell else {

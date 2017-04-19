@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		022C2B681EA7F11F00EBED86 /* ChatMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 022C2B671EA7F11F00EBED86 /* ChatMessageCell.swift */; };
 		023D2F9D1EA6EE1200BDC6C3 /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023D2F9C1EA6EE1200BDC6C3 /* UserCell.swift */; };
 		023D2F9F1EA6EE7A00BDC6C3 /* UIImageView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023D2F9E1EA6EE7A00BDC6C3 /* UIImageView+Ext.swift */; };
 		0251AF721EA328F900C201B0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF711EA328F900C201B0 /* AppDelegate.swift */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		022C2B671EA7F11F00EBED86 /* ChatMessageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatMessageCell.swift; sourceTree = "<group>"; };
 		023D2F9C1EA6EE1200BDC6C3 /* UserCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
 		023D2F9E1EA6EE7A00BDC6C3 /* UIImageView+Ext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImageView+Ext.swift"; sourceTree = "<group>"; };
 		0251AF6E1EA328F900C201B0 /* GameOfChats.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GameOfChats.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -62,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				023D2F9C1EA6EE1200BDC6C3 /* UserCell.swift */,
+				022C2B671EA7F11F00EBED86 /* ChatMessageCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -280,6 +283,7 @@
 				0251AF881EA32F3800C201B0 /* UIColor+Ext.swift in Sources */,
 				02C0AE721EA6CD47001B10EE /* Message.swift in Sources */,
 				0251AF851EA32BAF00C201B0 /* LoginController.swift in Sources */,
+				022C2B681EA7F11F00EBED86 /* ChatMessageCell.swift in Sources */,
 				023D2F9D1EA6EE1200BDC6C3 /* UserCell.swift in Sources */,
 				0251AF721EA328F900C201B0 /* AppDelegate.swift in Sources */,
 			);

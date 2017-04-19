@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 
 protocol NewMessageControllerDelegate: class {
-    func handleChatLog(forSelectedUser user: User)
+    func handleChatLog(forChatPartnerUser user: User)
 }
 
 class NewMessageController: UITableViewController {
@@ -60,7 +60,7 @@ class NewMessageController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedUser = users[indexPath.row]
         dismiss(animated: true) {
-            self.delegate?.handleChatLog(forSelectedUser: selectedUser)
+            self.delegate?.handleChatLog(forChatPartnerUser: selectedUser)
         }
     }
     

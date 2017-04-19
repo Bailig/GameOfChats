@@ -9,19 +9,25 @@
 import UIKit
 import Firebase
 
-class ChatLogController: UICollectionViewController, UITextFieldDelegate {
+class ChatLogController: UICollectionViewController, UITextFieldDelegate, UICollectionViewDelegateFlowLayout {
     
     var ref: FIRDatabaseReference?
-    var toUser: User? {
+    var chatPartnerUser: User? {
         didSet {
-            navigationItem.title = toUser?.name
+            navigationItem.title = chatPartnerUser?.name
+            observeMessagesForChatPartnerUser()
         }
     }
+    
+    var messagesWithChatPartner = [Message]()
+    
+    let cellId = "cellId"
     
     // MARK: - UI
     let inputsContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor.white
         return view
     }()
     
@@ -56,6 +62,8 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate {
         ref = FIRDatabase.database().reference()
         
         collectionView?.backgroundColor = UIColor.white
+        collectionView?.register(ChatMessageCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView?.alwaysBounceVertical = true
         
         view.addSubview(inputsContainerView)
         setupInputsContainerView()
@@ -63,6 +71,42 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate {
         view.addSubview(separatorLineView)
         setupSeparatorLineView()
     }
+    
+    func observeMessagesForChatPartnerUser() {
+        guard let currentUserUid = FIRAuth.auth()?.currentUser?.uid else {
+            print("error: unable to fetch current user's uid!")
+            return
+        }
+        
+        ref = FIRDatabase.database().reference()
+        let currentUserMessagesRef = ref?.child("user-messages").child(currentUserUid)
+        currentUserMessagesRef?.observe(.childAdded, with: { (snapshot) in
+
+            let messageId = snapshot.key
+            let messagesRef = self.ref?.child("messages").child(messageId)
+            messagesRef?.observeSingleEvent(of: .value, with: { (snapshot) in
+                
+                guard let dictionary = snapshot.value as? [String: Any] else { return }
+                
+                let message = Message()
+                message.id = messageId
+                message.setValuesForKeys(dictionary)
+                if self.chatPartnerUser?.id == message.chatPartnerId() {
+                    self.messagesWithChatPartner.append(message)
+                    DispatchQueue.main.async {
+                        self.collectionView?.reloadData()
+                    }
+                }
+                
+            }, withCancel: { (error) in
+                print("error: \(error.localizedDescription)")
+            })
+            
+        }) { (error) in
+            print("error: \(error.localizedDescription)")
+        }
+    }
+    
     
     // MARK: - setup UI
     func setupInputsContainerView() {
@@ -109,7 +153,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate {
             return
         }
         let fromUid = FIRAuth.auth()?.currentUser?.uid ?? ""
-        let toUid = toUser?.id ?? ""
+        let toUid = chatPartnerUser?.id ?? ""
         let messagesChildRef = ref.child("messages").childByAutoId()
         let timestamp = String(NSDate().timeIntervalSince1970)
         let values = ["text": text, "fromUid": fromUid, "toUid": toUid, "timestamp": timestamp]
@@ -131,7 +175,27 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate {
         
     }
     
+    // MARK: - collection view
+    
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as? ChatMessageCell else {
+            print("error: unable to dequeqe reusable cell!")
+            return UICollectionViewCell()
+        }
+        cell.textView.text = messagesWithChatPartner[indexPath.row].text
+        return cell
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return messagesWithChatPartner.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: view.frame.width, height: 80)
+    }
+    
     // MARK: - others
+    // calls handleSend() method when enter key pressed
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         handleSend()
         return true
