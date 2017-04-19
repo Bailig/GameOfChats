@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		023D2F9D1EA6EE1200BDC6C3 /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023D2F9C1EA6EE1200BDC6C3 /* UserCell.swift */; };
+		023D2F9F1EA6EE7A00BDC6C3 /* UIImageView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023D2F9E1EA6EE7A00BDC6C3 /* UIImageView+Ext.swift */; };
 		0251AF721EA328F900C201B0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF711EA328F900C201B0 /* AppDelegate.swift */; };
 		0251AF741EA328F900C201B0 /* MessagesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF731EA328F900C201B0 /* MessagesController.swift */; };
 		0251AF791EA328F900C201B0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0251AF781EA328F900C201B0 /* Assets.xcassets */; };
@@ -14,7 +16,6 @@
 		0251AF851EA32BAF00C201B0 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF841EA32BAF00C201B0 /* LoginController.swift */; };
 		0251AF881EA32F3800C201B0 /* UIColor+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0251AF871EA32F3800C201B0 /* UIColor+Ext.swift */; };
 		0269D6DE1EA6A69D00214DE7 /* ChatLogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0269D6DD1EA6A69D00214DE7 /* ChatLogController.swift */; };
-		028523E71EA5A208003DFA34 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028523E61EA5A208003DFA34 /* Extensions.swift */; };
 		02B9318E1EA4468600990FF2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 02B9318D1EA4468600990FF2 /* GoogleService-Info.plist */; };
 		02C0AE721EA6CD47001B10EE /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C0AE711EA6CD47001B10EE /* Message.swift */; };
 		02F62A5C1EA5590500677134 /* NewMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F62A5B1EA5590500677134 /* NewMessageController.swift */; };
@@ -24,6 +25,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		023D2F9C1EA6EE1200BDC6C3 /* UserCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
+		023D2F9E1EA6EE7A00BDC6C3 /* UIImageView+Ext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImageView+Ext.swift"; sourceTree = "<group>"; };
 		0251AF6E1EA328F900C201B0 /* GameOfChats.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GameOfChats.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0251AF711EA328F900C201B0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0251AF731EA328F900C201B0 /* MessagesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesController.swift; sourceTree = "<group>"; };
@@ -33,7 +36,6 @@
 		0251AF841EA32BAF00C201B0 /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		0251AF871EA32F3800C201B0 /* UIColor+Ext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+Ext.swift"; sourceTree = "<group>"; };
 		0269D6DD1EA6A69D00214DE7 /* ChatLogController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatLogController.swift; sourceTree = "<group>"; };
-		028523E61EA5A208003DFA34 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		02B9318D1EA4468600990FF2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		02C0AE711EA6CD47001B10EE /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		02F62A5B1EA5590500677134 /* NewMessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewMessageController.swift; sourceTree = "<group>"; };
@@ -56,6 +58,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		023D2F9B1EA6EDF000BDC6C3 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				023D2F9C1EA6EE1200BDC6C3 /* UserCell.swift */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
 		0251AF651EA328F900C201B0 = {
 			isa = PBXGroup;
 			children = (
@@ -77,9 +87,9 @@
 		0251AF701EA328F900C201B0 /* GameOfChats */ = {
 			isa = PBXGroup;
 			children = (
-				028523E51EA5A1F3003DFA34 /* Helper */,
-				02F62A5D1EA55D6900677134 /* Model */,
 				0251AF861EA32F1500C201B0 /* Extension */,
+				02F62A5D1EA55D6900677134 /* Model */,
+				023D2F9B1EA6EDF000BDC6C3 /* View */,
 				0251AF831EA32B8F00C201B0 /* Controller */,
 				0251AF711EA328F900C201B0 /* AppDelegate.swift */,
 				0251AF781EA328F900C201B0 /* Assets.xcassets */,
@@ -106,16 +116,9 @@
 			isa = PBXGroup;
 			children = (
 				0251AF871EA32F3800C201B0 /* UIColor+Ext.swift */,
+				023D2F9E1EA6EE7A00BDC6C3 /* UIImageView+Ext.swift */,
 			);
 			name = Extension;
-			sourceTree = "<group>";
-		};
-		028523E51EA5A1F3003DFA34 /* Helper */ = {
-			isa = PBXGroup;
-			children = (
-				028523E61EA5A208003DFA34 /* Extensions.swift */,
-			);
-			name = Helper;
 			sourceTree = "<group>";
 		};
 		02F62A5D1EA55D6900677134 /* Model */ = {
@@ -268,15 +271,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				023D2F9F1EA6EE7A00BDC6C3 /* UIImageView+Ext.swift in Sources */,
 				0269D6DE1EA6A69D00214DE7 /* ChatLogController.swift in Sources */,
 				0251AF741EA328F900C201B0 /* MessagesController.swift in Sources */,
 				02F62A621EA5745600677134 /* LoginController+Handlers.swift in Sources */,
 				02F62A5C1EA5590500677134 /* NewMessageController.swift in Sources */,
-				028523E71EA5A208003DFA34 /* Extensions.swift in Sources */,
 				02F62A5F1EA55D7800677134 /* User.swift in Sources */,
 				0251AF881EA32F3800C201B0 /* UIColor+Ext.swift in Sources */,
 				02C0AE721EA6CD47001B10EE /* Message.swift in Sources */,
 				0251AF851EA32BAF00C201B0 /* LoginController.swift in Sources */,
+				023D2F9D1EA6EE1200BDC6C3 /* UserCell.swift in Sources */,
 				0251AF721EA328F900C201B0 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

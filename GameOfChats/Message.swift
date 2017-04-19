@@ -13,6 +13,6 @@ class Message: NSObject {
     var fromUid: String?
     var toUid: String?
     var text: String?
-    var timestamp: Double?
+    var timestamp: String?
     
 }

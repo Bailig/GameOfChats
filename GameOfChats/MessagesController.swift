@@ -13,6 +13,8 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
 
     var ref: FIRDatabaseReference?
     var messages = [Message]()
+    var messagesDictionary = [String: Message]()
+    let cellId = "cellId"
     
     // MARK: - view did load
     override func viewDidLoad() {
@@ -25,23 +27,29 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         
         checkIfUserIsLogedIn()
         
+        tableView.register(UserCell.self, forCellReuseIdentifier: cellId)
+        
         observeMessage()
     }
     
     func observeMessage() {
-        guard let ref = ref else {
-            print("error: unexpected nil for ref: FIRDatabaseReference")
-            return
-        }
-        
-        ref.child("messages").observe(.childAdded, with: { (snapshot) in
+        ref?.child("messages").observe(.childAdded, with: { (snapshot) in
             guard let dictionary = snapshot.value as? [String: Any] else {
                 print("error: unable to fetch message!")
                 return
             }
             let message = Message()
             message.setValuesForKeys(dictionary)
-            self.messages.append(message)
+            if let toUid = message.toUid {
+                self.messagesDictionary[toUid] = message
+                self.messages = Array(self.messagesDictionary.values)
+                self.messages.sort(by: { (m1, m2) -> Bool in
+                    guard let t1 = m1.timestamp, let timestamp1 = Double(t1), let t2 = m2.timestamp, let timestamp2 = Double(t2) else {
+                        return false
+                    }
+                    return timestamp1 > timestamp2
+                })
+            }
             
             DispatchQueue.main.async {
                 self.tableView.reloadData()
@@ -64,11 +72,7 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
     }
     
     func fetchUserAndSetNavBarTitle(withUid uid: String) {
-        guard let ref = ref else {
-            print("error: unexpected nil for ref: FIRDatabaseReference")
-            return
-        }
-        ref.child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot: FIRDataSnapshot) in
+        ref?.child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot: FIRDataSnapshot) in
             guard let dictionary = snapshot.value as? [String: Any] else {
                 print("error: unable to fetch user's name!")
                 return
@@ -161,7 +165,13 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
     // MARK: - setup table view
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return UITableViewCell()
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as? UserCell else {
+            print("error: unavle to dequeue reusable cell with identifier \(cellId)")
+            return UITableViewCell()
+        }
+        
+        cell.message = messages[indexPath.row]
+        return cell
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -170,6 +180,10 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return messages.count
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 72
     }
     
     

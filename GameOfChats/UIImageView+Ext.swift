@@ -1,8 +1,8 @@
 //
-//  Extensions.swift
+//  UIImageView+Ext.swift
 //  GameOfChats
 //
-//  Created by Bailig Abhanar on 2017-04-17.
+//  Created by Bailig Abhanar on 2017-04-18.
 //  Copyright © 2017 Bailig Abhanar. All rights reserved.
 //
 
@@ -16,7 +16,7 @@ extension UIImageView {
     func loadImageUsingCache(withUrlString urlString: String) {
         image = nil
         
-        // check cache for image firse
+        // check cache for image first
         if let cachedImage = imageCache.object(forKey: urlString as AnyObject) as? UIImage {
             self.image = cachedImage
             return
