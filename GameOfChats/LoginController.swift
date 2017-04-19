@@ -11,12 +11,12 @@ import Firebase
 
 protocol LoginControllerDelegate: class {
     func fetchUserAndSetNavBarTitle(withUid uid: String)
-    func setNavBar(withUser user: User)
 }
 
 
 class LoginController: UIViewController {
     
+    var ref: FIRDatabaseReference?
     var uid: String?
     weak var delegate: LoginControllerDelegate?
     
@@ -105,6 +105,8 @@ class LoginController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = UIColor(r: 61, g: 91, b: 151)
+        
+        ref = FIRDatabase.database().reference()
         
         // add views
         view.addSubview(loginRegisterButton)

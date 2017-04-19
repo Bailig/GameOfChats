@@ -14,26 +14,7 @@ class UserCell: UITableViewCell {
     // will be set by MessagesController
     var message: Message? {
         didSet {
-            if let toUid = message?.toUid {
-                let ref = FIRDatabase.database().reference()
-                let toUserRef = ref.child("users").child(toUid)
-                toUserRef.observeSingleEvent(of: .value, with: { (snapshot) in
-                    guard let dictionary = snapshot.value as? [String: Any] else {
-                        print("error: unable to fetch toUser!")
-                        return
-                    }
-                    
-                    self.textLabel?.text = dictionary["name"] as? String
-                    
-                    if let profileImageUrl = dictionary["profileImageUrl"] as? String {
-                        self.profileImageView.loadImageUsingCache(withUrlString: profileImageUrl)
-                    }
-                    
-                }, withCancel: { (error) in
-                    print("error: \(error.localizedDescription)")
-                })
-            }
-            
+            setupNameAndProfileImage()
             detailTextLabel?.text = message?.text
             if let timestampString = message?.timestamp, let timestampDouble = Double(timestampString) {
                 let timestampDate = Date(timeIntervalSince1970: timestampDouble)
@@ -41,6 +22,36 @@ class UserCell: UITableViewCell {
                 dateFormatter.dateFormat = "hh:mm:ss a"
                 timeLabel.text = dateFormatter.string(from: timestampDate)
             }
+        }
+    }
+    
+    private func setupNameAndProfileImage() {
+        let chatPartnerId: String?
+        
+        if message?.fromUid == FIRAuth.auth()?.currentUser?.uid {
+            chatPartnerId = message?.toUid
+        } else {
+            chatPartnerId = message?.fromUid
+        }
+        
+        if let chatPartnerId = chatPartnerId {
+            let ref = FIRDatabase.database().reference()
+            let toUserRef = ref.child("users").child(chatPartnerId)
+            toUserRef.observeSingleEvent(of: .value, with: { (snapshot) in
+                guard let dictionary = snapshot.value as? [String: Any] else {
+                    print("error: unable to fetch toUser!")
+                    return
+                }
+                
+                self.textLabel?.text = dictionary["name"] as? String
+                
+                if let profileImageUrl = dictionary["profileImageUrl"] as? String {
+                    self.profileImageView.loadImageUsingCache(withUrlString: profileImageUrl)
+                }
+                
+            }, withCancel: { (error) in
+                print("error: \(error.localizedDescription)")
+            })
         }
     }
     

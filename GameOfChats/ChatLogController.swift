@@ -113,7 +113,22 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate {
         let messagesChildRef = ref.child("messages").childByAutoId()
         let timestamp = String(NSDate().timeIntervalSince1970)
         let values = ["text": text, "fromUid": fromUid, "toUid": toUid, "timestamp": timestamp]
-        messagesChildRef.updateChildValues(values)
+
+        messagesChildRef.updateChildValues(values) { (error, ref) in
+            if let error = error {
+                print("error: \(error.localizedDescription)")
+                return
+            }
+            let messageId = messagesChildRef.key
+            
+            let userMessagesRef = self.ref?.child("user-messages").child(fromUid)
+            userMessagesRef?.updateChildValues([messageId: 1])
+            
+            let recipientUserMessageRef = self.ref?.child("user-messages").child(toUid)
+            recipientUserMessageRef?.updateChildValues([messageId: 1])
+            
+        }
+        
     }
     
     // MARK: - others

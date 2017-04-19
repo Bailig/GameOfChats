@@ -12,6 +12,7 @@ import Firebase
 class MessagesController: UITableViewController, LoginControllerDelegate, NewMessageControllerDelegate {
 
     var ref: FIRDatabaseReference?
+    var currentUser: User?
     var messages = [Message]()
     var messagesDictionary = [String: Message]()
     let cellId = "cellId"
@@ -28,37 +29,9 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         checkIfUserIsLogedIn()
         
         tableView.register(UserCell.self, forCellReuseIdentifier: cellId)
-        
-        observeMessage()
     }
     
-    func observeMessage() {
-        ref?.child("messages").observe(.childAdded, with: { (snapshot) in
-            guard let dictionary = snapshot.value as? [String: Any] else {
-                print("error: unable to fetch message!")
-                return
-            }
-            let message = Message()
-            message.setValuesForKeys(dictionary)
-            if let toUid = message.toUid {
-                self.messagesDictionary[toUid] = message
-                self.messages = Array(self.messagesDictionary.values)
-                self.messages.sort(by: { (m1, m2) -> Bool in
-                    guard let t1 = m1.timestamp, let timestamp1 = Double(t1), let t2 = m2.timestamp, let timestamp2 = Double(t2) else {
-                        return false
-                    }
-                    return timestamp1 > timestamp2
-                })
-            }
-            
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
-        }) { (error) in
-            print("error: \(error.localizedDescription)")
-        }
-        
-    }
+    
     
     func checkIfUserIsLogedIn() {
         if let uid = FIRAuth.auth()?.currentUser?.uid {
@@ -71,6 +44,7 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         
     }
     
+    // this function is being called from LoginController as well
     func fetchUserAndSetNavBarTitle(withUid uid: String) {
         ref?.child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot: FIRDataSnapshot) in
             guard let dictionary = snapshot.value as? [String: Any] else {
@@ -78,18 +52,68 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
                 return
             }
             
-            let user = User()
-            user.setValuesForKeys(dictionary)
-            self.setNavBar(withUser: user)
+            self.currentUser = User()
+            self.currentUser?.setValuesForKeys(dictionary)
+            self.currentUser?.id = uid
+            self.setNavBar()
+            
+            self.observeUserMessages()
             
         }) { (error) in
             print("error: \(error.localizedDescription)")
         }
     }
     
+    func observeUserMessages() {
+        guard let uid = currentUser?.id else {
+            print("error: unexpected nil found when getting currentUser!")
+            return
+        }
+        // clear messages before append
+        self.messages.removeAll()
+        self.messagesDictionary.removeAll()
+        
+        let userMessageRef = ref?.child("user-messages").child(uid)
+        userMessageRef?.observe(.childAdded, with: { (snapshot) in
+            
+            let messageId = snapshot.key
+            let messageRef = self.ref?.child("messages").child(messageId)
+            
+            messageRef?.observe(.value, with: { (snapshot) in
+                
+                guard let dictionary = snapshot.value as? [String: Any] else {
+                    print("error: unable to fetch message!")
+                    return
+                }
+                let message = Message()
+                message.setValuesForKeys(dictionary)
+                if let toUid = message.toUid {
+                    self.messagesDictionary[toUid] = message
+                    self.messages = Array(self.messagesDictionary.values)
+                    self.messages.sort(by: { (m1, m2) -> Bool in
+                        guard let t1 = m1.timestamp, let timestamp1 = Double(t1), let t2 = m2.timestamp, let timestamp2 = Double(t2) else {
+                            return false
+                        }
+                        return timestamp1 > timestamp2
+                    })
+                }
+                
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+                
+            }, withCancel: { (error) in
+                print("error: \(error.localizedDescription)")
+            })
+            
+        }, withCancel: { (error) in
+            print("error: \(error.localizedDescription)")
+        })
+    }
+    
     // MARK: - setup UI
 
-    func setNavBar(withUser user: User) {
+    func setNavBar() {
         let titleView = UIView()
         titleView.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
         
@@ -103,7 +127,7 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         profileImageView.layer.cornerRadius = 20
         profileImageView.clipsToBounds = true
         
-        if let profileImageUrl = user.profileImageUrl {
+        if let profileImageUrl = self.currentUser?.profileImageUrl {
             profileImageView.loadImageUsingCache(withUrlString: profileImageUrl)
         }
         
@@ -116,7 +140,7 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         
         let nameLabel = UILabel()
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        nameLabel.text = user.name
+        nameLabel.text = self.currentUser?.name
         
         containerView.addSubview(nameLabel)
         

@@ -41,13 +41,10 @@ extension LoginController: UIImagePickerControllerDelegate, UINavigationControll
                 return
             }
             
-            guard let uid = user?.uid else {
-                print("error: unable to fetch user uid!")
-                return
+            if let uid = user?.uid {
+                self.uid = uid
+                self.delegate?.fetchUserAndSetNavBarTitle(withUid: uid)
             }
-            
-            self.uid = uid
-            self.delegate?.fetchUserAndSetNavBarTitle(withUid: uid)
             
             self.dismiss(animated: true, completion: nil)
         })
@@ -102,7 +99,7 @@ extension LoginController: UIImagePickerControllerDelegate, UINavigationControll
             let user = User()
             user.setValuesForKeys(values)
             
-            self.delegate?.setNavBar(withUser: user)
+            self.delegate?.fetchUserAndSetNavBarTitle(withUid: uid)
             self.dismiss(animated: true, completion: nil)
         })
     }
