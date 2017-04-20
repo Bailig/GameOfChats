@@ -12,9 +12,9 @@ import Firebase
 class ChatLogController: UICollectionViewController, UITextFieldDelegate, UICollectionViewDelegateFlowLayout {
     
     var ref: FIRDatabaseReference?
-    var chatPartnerUser: User? {
+    var chatPartner: User? {
         didSet {
-            navigationItem.title = chatPartnerUser?.name
+            navigationItem.title = chatPartner?.name
             observeMessagesForChatPartnerUser()
         }
     }
@@ -93,7 +93,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
                 let message = Message()
                 message.id = messageId
                 message.setValuesForKeys(dictionary)
-                if self.chatPartnerUser?.id == message.chatPartnerId() {
+                if self.chatPartner?.id == message.chatPartnerId() {
                     self.messagesWithChatPartner.append(message)
                     DispatchQueue.main.async {
                         self.collectionView?.reloadData()
@@ -155,7 +155,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
             return
         }
         let fromUid = FIRAuth.auth()?.currentUser?.uid ?? ""
-        let toUid = chatPartnerUser?.id ?? ""
+        let toUid = chatPartner?.id ?? ""
         let messagesChildRef = ref.child("messages").childByAutoId()
         let timestamp = String(NSDate().timeIntervalSince1970)
         let values = ["text": text, "fromUid": fromUid, "toUid": toUid, "timestamp": timestamp]
@@ -183,8 +183,11 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
             print("error: unable to dequeqe reusable cell!")
             return UICollectionViewCell()
         }
-        cell.textView.text = text
+        
+        cell.message = messagesWithChatPartner[indexPath.item]
+        cell.chatPartner = chatPartner
         cell.bubbleViewWidthAnchor?.constant = estimatedFrame(forText: text).width + 32
+        
         return cell
     }
     
