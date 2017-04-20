@@ -87,8 +87,9 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
                 }
                 let message = Message()
                 message.setValuesForKeys(dictionary)
-                if let toUid = message.toUid {
-                    self.messagesDictionary[toUid] = message
+                
+                if let chatPartnerId = message.chatPartnerId() {
+                    self.messagesDictionary[chatPartnerId] = message
                     self.messages = Array(self.messagesDictionary.values)
                     self.messages.sort(by: { (m1, m2) -> Bool in
                         guard let t1 = m1.timestamp, let timestamp1 = Double(t1), let t2 = m2.timestamp, let timestamp2 = Double(t2) else {
