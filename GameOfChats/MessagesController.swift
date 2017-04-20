@@ -101,9 +101,9 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
                 
                 // reduces the number of times to reload table data
                 self.timer?.invalidate()
-                print("canceled the timer")
+//                print("canceled the timer")
                 self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.handleReloadTable), userInfo: nil, repeats: false)
-                print("scheduled a table reload in 0.1 sec")
+//                print("scheduled a table reload in 0.1 sec")
             }, withCancel: { (error) in
                 print("error: \(error.localizedDescription)")
             })
@@ -118,7 +118,7 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
     func handleReloadTable() {
         DispatchQueue.main.async {
             self.tableView.reloadData()
-            print("table reloaded")
+//            print("table reloaded")
         }
     }
     
