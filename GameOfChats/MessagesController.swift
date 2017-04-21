@@ -63,7 +63,7 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
             print("error: \(error.localizedDescription)")
         }
     }
-    
+
     func observeUserMessages() {
         guard let uid = currentUser?.id else {
             print("error: unexpected nil found when getting currentUser!")
@@ -185,7 +185,6 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         
         self.navigationItem.titleView = titleView
         
-        titleView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleChatLog)))
     }
     
     

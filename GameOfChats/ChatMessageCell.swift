@@ -32,6 +32,13 @@ class ChatMessageCell: UICollectionViewCell {
                 bubbleViewLeftAnchor?.isActive = true
                 profileImageView.isHidden = false
             }
+            if let messageImageUrl = message?.imageUrl {
+                messageImageView.loadImageUsingCache(withUrlString: messageImageUrl)
+                messageImageView.isHidden = false
+                bubbleView.backgroundColor = UIColor.clear
+            } else {
+                messageImageView.isHidden = true
+            }
         }
     }
     
@@ -69,6 +76,14 @@ class ChatMessageCell: UICollectionViewCell {
         return bv
     }()
     
+    let messageImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        iv.layer.cornerRadius = 16
+        iv.layer.masksToBounds = true
+        iv.contentMode = .scaleAspectFill
+        return iv
+    }()
     var bubbleViewWidthAnchor: NSLayoutConstraint?
     var bubbleViewRightAnchor: NSLayoutConstraint?
     var bubbleViewLeftAnchor: NSLayoutConstraint?
@@ -101,8 +116,13 @@ class ChatMessageCell: UICollectionViewCell {
         profileImageView.widthAnchor.constraint(equalToConstant: 32).isActive = true
         profileImageView.heightAnchor.constraint(equalToConstant: 32).isActive = true
         
+        bubbleView.addSubview(messageImageView)
         
-        
+        messageImageView.topAnchor.constraint(equalTo: bubbleView.topAnchor).isActive = true
+        messageImageView.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor).isActive = true
+        messageImageView.leftAnchor.constraint(equalTo: bubbleView.leftAnchor).isActive = true
+        messageImageView.rightAnchor.constraint(equalTo: bubbleView.rightAnchor).isActive = true
+
     }
     
     required init?(coder aDecoder: NSCoder) {

@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class ChatLogController: UICollectionViewController, UITextFieldDelegate, UICollectionViewDelegateFlowLayout {
+class ChatLogController: UICollectionViewController, UITextFieldDelegate, UICollectionViewDelegateFlowLayout, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     var ref: FIRDatabaseReference?
     var chatPartner: User? {
@@ -86,6 +86,16 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         containerView.backgroundColor = UIColor.white
         containerView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50)
         
+        let uploadImageView = UIImageView()
+        uploadImageView.translatesAutoresizingMaskIntoConstraints = false
+        uploadImageView.image = UIImage(named: "upload_image_icon")
+        uploadImageView.isUserInteractionEnabled = true
+        uploadImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleUploadImage)))
+        containerView.addSubview(uploadImageView)
+        uploadImageView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
+        uploadImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
+        uploadImageView.widthAnchor.constraint(equalToConstant: 44).isActive = true
+        uploadImageView.heightAnchor.constraint(equalToConstant: 44).isActive = true
         
         let sendButton = UIButton(type: .system)
         sendButton.translatesAutoresizingMaskIntoConstraints = false
@@ -98,7 +108,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         sendButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
 
         containerView.addSubview(self.inputTextField)
-        self.inputTextField.leftAnchor.constraint(equalTo: containerView.leftAnchor, constant: 16).isActive = true
+        self.inputTextField.leftAnchor.constraint(equalTo: uploadImageView.rightAnchor, constant: 8).isActive = true
         self.inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor, constant: 16).isActive = true
         self.inputTextField.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
         self.inputTextField.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
@@ -153,17 +163,98 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         inputTextField.text = nil
     }
     
+    
+    
+    func handleUploadImage() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        
+        present(imagePickerController, animated: true, completion: nil)
+        
+    }
+    
+    // MARK: - image picker controller
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+
+        var selectedImageFromPicker: UIImage?
+        
+        if let editedImage = info["UIImagePickerControllerEditedImage"] as? UIImage {
+            selectedImageFromPicker = editedImage
+        } else if let originalImage = info["UIImagePickerControllerOriginalImage"] as? UIImage {
+            selectedImageFromPicker = originalImage
+        } else {
+            print("error: unable to fetch picked image!")
+        }
+        
+        if let selectedImage = selectedImageFromPicker {
+            uploadToFirebaseStorage(usingImage: selectedImage)
+        }
+        dismiss(animated: true, completion: nil)
+    }
+    
+    private func uploadToFirebaseStorage(usingImage image: UIImage) {
+        let uniqueImageName = NSUUID().uuidString
+        let messageImageRef = FIRStorage.storage().reference().child("message_image").child("\(uniqueImageName).jpg")
+        
+        if let uploadData = UIImageJPEGRepresentation(image, 0.2) {
+            messageImageRef.put(uploadData, metadata: nil, completion: { (metadata, error) in
+                if let error = error {
+                    print("error: \(error.localizedDescription)")
+                    return
+                }
+                if let imageUrl = metadata?.downloadURL()?.absoluteString {
+                    
+                    self.sendMessage(withImageUrl: imageUrl)
+                }
+            })
+        }
+    }
+    
+    func sendMessage(withImageUrl imageUrl: String) {
+        guard let ref = ref else {
+            print("error: unexpected nil for ref: FIRDatabaseReference")
+            return
+        }
+        let fromUid = FIRAuth.auth()?.currentUser?.uid ?? ""
+        let toUid = chatPartner?.id ?? ""
+        let messagesChildRef = ref.child("messages").childByAutoId()
+        let timestamp = String(NSDate().timeIntervalSince1970)
+        let values = ["imageUrl": imageUrl, "fromUid": fromUid, "toUid": toUid, "timestamp": timestamp]
+        
+        messagesChildRef.updateChildValues(values) { (error, ref) in
+            if let error = error {
+                print("error: \(error.localizedDescription)")
+                return
+            }
+            let messageId = messagesChildRef.key
+            
+            let userMessagesRef = self.ref?.child("user-messages").child(fromUid).child(toUid)
+            userMessagesRef?.updateChildValues([messageId: 1])
+            
+            let recipientUserMessageRef = self.ref?.child("user-messages").child(toUid).child(fromUid)
+            recipientUserMessageRef?.updateChildValues([messageId: 1])
+        }
+        
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
     // MARK: - collection view
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as? ChatMessageCell, let text = messages[indexPath.item].text else {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as? ChatMessageCell else {
             print("error: unable to dequeqe reusable cell!")
             return UICollectionViewCell()
         }
         
         cell.message = messages[indexPath.item]
         cell.chatPartner = chatPartner
-        cell.bubbleViewWidthAnchor?.constant = estimatedFrame(forText: text).width + 32
+        if let text = messages[indexPath.item].text {
+            cell.bubbleViewWidthAnchor?.constant = estimatedFrame(forText: text).width + 32
+        }
         
         return cell
     }
