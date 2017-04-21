@@ -76,34 +76,14 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         let userMessageRef = ref?.child("user-messages").child(uid)
         userMessageRef?.observe(.childAdded, with: { (snapshot) in
             
-            let messageId = snapshot.key
-            let messageRef = self.ref?.child("messages").child(messageId)
+            let chatPartnerUid = snapshot.key
+            let chatPartnerRef = userMessageRef?.child(chatPartnerUid)
             
-            messageRef?.observe(.value, with: { (snapshot) in
+            chatPartnerRef?.observe(.childAdded, with: { (snapshot) in
                 
-                guard let dictionary = snapshot.value as? [String: Any] else {
-                    print("error: unable to fetch message!")
-                    return
-                }
-                let message = Message()
-                message.setValuesForKeys(dictionary)
+                let messageId = snapshot.key
+                self.fetchMessage(withMessageId: messageId)
                 
-                if let chatPartnerId = message.chatPartnerId() {
-                    self.messagesDictionary[chatPartnerId] = message
-                    self.messages = Array(self.messagesDictionary.values)
-                    self.messages.sort(by: { (m1, m2) -> Bool in
-                        guard let t1 = m1.timestamp, let timestamp1 = Double(t1), let t2 = m2.timestamp, let timestamp2 = Double(t2) else {
-                            return false
-                        }
-                        return timestamp1 > timestamp2
-                    })
-                }
-                
-                // reduces the number of times to reload table data
-                self.timer?.invalidate()
-//                print("canceled the timer")
-                self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.handleReloadTable), userInfo: nil, repeats: false)
-//                print("scheduled a table reload in 0.1 sec")
             }, withCancel: { (error) in
                 print("error: \(error.localizedDescription)")
             })
@@ -113,9 +93,49 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         })
     }
     
+    private func fetchMessage(withMessageId messageId: String) {
+        let messageRef = self.ref?.child("messages").child(messageId)
+        
+        messageRef?.observe(.value, with: { (snapshot) in
+            
+            guard let dictionary = snapshot.value as? [String: Any] else {
+                print("error: unable to fetch message!")
+                return
+            }
+            let message = Message()
+            message.setValuesForKeys(dictionary)
+            
+            if let chatPartnerId = message.chatPartnerId() {
+                self.messagesDictionary[chatPartnerId] = message
+            }
+            
+            // reduces the number of times to reload table data
+            self.attemptReloadOfTable()
+            
+        }, withCancel: { (error) in
+            print("error: \(error.localizedDescription)")
+        })
+    }
+    
+    private func attemptReloadOfTable() {
+        self.timer?.invalidate()
+        //                print("canceled the timer")
+        self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.handleReloadTable), userInfo: nil, repeats: false)
+        //                print("scheduled a table reload in 0.1 sec")
+
+    }
     // the timer used to reduce the number of times to reload table data
     var timer: Timer?
     func handleReloadTable() {
+        
+        self.messages = Array(self.messagesDictionary.values)
+        self.messages.sort(by: { (m1, m2) -> Bool in
+            guard let t1 = m1.timestamp, let timestamp1 = Double(t1), let t2 = m2.timestamp, let timestamp2 = Double(t2) else {
+                return false
+            }
+            return timestamp1 > timestamp2
+        })
+        
         DispatchQueue.main.async {
             self.tableView.reloadData()
 //            print("table reloaded")

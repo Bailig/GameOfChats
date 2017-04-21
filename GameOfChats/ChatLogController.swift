@@ -19,7 +19,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         }
     }
     
-    var messagesWithChatPartner = [Message]()
+    var messages = [Message]()
     let cellId = "cellId"
     
     
@@ -39,13 +39,13 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     }
     
     func observeMessagesForChatPartnerUser() {
-        guard let currentUserUid = FIRAuth.auth()?.currentUser?.uid else {
+        guard let currentUserUid = FIRAuth.auth()?.currentUser?.uid, let chatPartnerUid = chatPartner?.id else {
             print("error: unable to fetch current user's uid!")
             return
         }
         
         ref = FIRDatabase.database().reference()
-        let currentUserMessagesRef = ref?.child("user-messages").child(currentUserUid)
+        let currentUserMessagesRef = ref?.child("user-messages").child(currentUserUid).child(chatPartnerUid)
         currentUserMessagesRef?.observe(.childAdded, with: { (snapshot) in
 
             let messageId = snapshot.key
@@ -57,11 +57,9 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
                 let message = Message()
                 message.id = messageId
                 message.setValuesForKeys(dictionary)
-                if self.chatPartner?.id == message.chatPartnerId() {
-                    self.messagesWithChatPartner.append(message)
-                    DispatchQueue.main.async {
-                        self.collectionView?.reloadData()
-                    }
+                self.messages.append(message)
+                DispatchQueue.main.async {
+                    self.collectionView?.reloadData()
                 }
                 
             }, withCancel: { (error) in
@@ -146,10 +144,10 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
             }
             let messageId = messagesChildRef.key
             
-            let userMessagesRef = self.ref?.child("user-messages").child(fromUid)
+            let userMessagesRef = self.ref?.child("user-messages").child(fromUid).child(toUid)
             userMessagesRef?.updateChildValues([messageId: 1])
             
-            let recipientUserMessageRef = self.ref?.child("user-messages").child(toUid)
+            let recipientUserMessageRef = self.ref?.child("user-messages").child(toUid).child(fromUid)
             recipientUserMessageRef?.updateChildValues([messageId: 1])
         }
         inputTextField.text = nil
@@ -158,12 +156,12 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     // MARK: - collection view
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as? ChatMessageCell, let text = messagesWithChatPartner[indexPath.item].text else {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as? ChatMessageCell, let text = messages[indexPath.item].text else {
             print("error: unable to dequeqe reusable cell!")
             return UICollectionViewCell()
         }
         
-        cell.message = messagesWithChatPartner[indexPath.item]
+        cell.message = messages[indexPath.item]
         cell.chatPartner = chatPartner
         cell.bubbleViewWidthAnchor?.constant = estimatedFrame(forText: text).width + 32
         
@@ -171,12 +169,12 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return messagesWithChatPartner.count
+        return messages.count
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        guard let text = messagesWithChatPartner[indexPath.item].text else {
+        guard let text = messages[indexPath.item].text else {
             print("error: unable to get messages' text!")
             return CGSize(width: view.frame.width, height: 80)
         }
