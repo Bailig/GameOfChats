@@ -9,10 +9,17 @@
 import UIKit
 import Firebase
 
+protocol ChatMessageCellDelegate {
+    func preformZoomIn(forStartingImageView imageView: UIImageView)
+}
+
 class ChatMessageCell: UICollectionViewCell {
     
     static let blueColor = UIColor(r: 0, g: 137, b: 249)
     static let grayColor = UIColor(r: 240, g: 240, b: 240)
+    
+    
+    var delegate: ChatMessageCellDelegate?
     
     var message: Message? {
         didSet {
@@ -77,14 +84,24 @@ class ChatMessageCell: UICollectionViewCell {
         return bv
     }()
     
-    let messageImageView: UIImageView = {
+    lazy var messageImageView: UIImageView = {
         let iv = UIImageView()
         iv.translatesAutoresizingMaskIntoConstraints = false
         iv.layer.cornerRadius = 16
         iv.layer.masksToBounds = true
         iv.contentMode = .scaleAspectFill
+        iv.isUserInteractionEnabled = true
+        iv.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleImageTap)))
         return iv
     }()
+    
+    func handleImageTap(_ tapGesture: UITapGestureRecognizer) {
+        guard let imageView = tapGesture.view as? UIImageView else {
+            print("error: unable to fetch a UIImageView from tapGesture!")
+            return
+        }
+        delegate?.preformZoomIn(forStartingImageView: imageView)
+    }
     var bubbleViewWidthAnchor: NSLayoutConstraint?
     var bubbleViewRightAnchor: NSLayoutConstraint?
     var bubbleViewLeftAnchor: NSLayoutConstraint?

@@ -21,6 +21,8 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     
     var messages = [Message]()
     let cellId = "cellId"
+    var imageZoomStartingFrame: CGRect?
+    var imageZoomBlackBackgroundView: UIView?
     
     
     // MARK: - view did load
@@ -249,13 +251,15 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
             print("error: unable to dequeqe reusable cell!")
             return UICollectionViewCell()
         }
-        
+        cell.delegate = self
         cell.message = messages[indexPath.item]
         cell.chatPartner = chatPartner
         if let text = cell.message?.text {
             cell.bubbleViewWidthAnchor?.constant = estimatedFrame(forText: text).width + 32
+            cell.textView.isHidden = false
         } else if cell.message?.imageUrl != nil {
             cell.bubbleViewWidthAnchor?.constant = 200
+            cell.textView.isHidden = true
         }
         
         return cell
@@ -340,5 +344,66 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     // this method will be call every time we rotate the device.
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         collectionView?.collectionViewLayout.invalidateLayout()
+    }
+}
+
+extension ChatLogController: ChatMessageCellDelegate {
+    func preformZoomIn(forStartingImageView imageView: UIImageView) {
+        // 1. add a view on top of the tapped image
+        
+        // get the frame of tapped image
+        if let startingFrame = imageView.superview?.convert(imageView.frame, to: nil) {
+            
+            imageZoomStartingFrame = startingFrame
+            
+            // create a new image view on top of it
+            let zoomingImageView = UIImageView(frame: startingFrame)
+            zoomingImageView.image = imageView.image
+            zoomingImageView.isUserInteractionEnabled = true
+            zoomingImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleZoomOut)))
+            
+            if let keyWindow = UIApplication.shared.keyWindow {
+                
+                // create black background
+                imageZoomBlackBackgroundView = UIView(frame: keyWindow.frame)
+                imageZoomBlackBackgroundView?.backgroundColor = UIColor.black
+                imageZoomBlackBackgroundView?.alpha = 0
+                if let imageZoomBlackBackgroundView = imageZoomBlackBackgroundView {
+                    keyWindow.addSubview(imageZoomBlackBackgroundView)
+                }
+                
+                keyWindow.addSubview(zoomingImageView)
+                UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                    
+                    self.imageZoomBlackBackgroundView?.alpha = 1
+                    self.inputsContainerView.alpha = 0
+                    // calculate height of the image when it's zoomed
+                    let height = keyWindow.frame.width * startingFrame.height / startingFrame.width
+                    zoomingImageView.frame = CGRect(x: 0, y: 0, width: keyWindow.frame.width, height: height)
+                    zoomingImageView.center = keyWindow.center
+                    
+                }, completion: nil)
+            }
+        }
+        
+    }
+    
+    func handleZoomOut(_ tapGesture: UITapGestureRecognizer) {
+        guard let zoomOutImageView = tapGesture.view as? UIImageView else {
+            print("error: unable to fetch zoomOutImageView from gesture recognizer!")
+            return
+        }
+        zoomOutImageView.clipsToBounds = true
+        zoomOutImageView.layer.cornerRadius = 16
+        
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: { 
+            if let startingFrame = self.imageZoomStartingFrame {
+                zoomOutImageView.frame = startingFrame
+            }
+            self.imageZoomBlackBackgroundView?.alpha = 0
+            self.inputsContainerView.alpha = 1
+        }) { (completed) in
+            zoomOutImageView.removeFromSuperview()
+        }
     }
 }
