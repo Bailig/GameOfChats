@@ -36,6 +36,16 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .interactive
         
+        setupKeyBoardObserver()
+    }
+    
+    func setupKeyBoardObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyBoardDidShow), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
+    }
+    func handleKeyBoardDidShow() {
+        guard messages.count > 0 else { return }
+        let indexPath = IndexPath(item: messages.count - 1, section: 0)
+        collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
     }
     
     func observeMessagesForChatPartnerUser() {
@@ -54,12 +64,14 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
                 
                 guard let dictionary = snapshot.value as? [String: Any] else { return }
                 
-                let message = Message()
+                let message = Message(dictionary: dictionary)
                 message.id = messageId
-                message.setValuesForKeys(dictionary)
                 self.messages.append(message)
                 DispatchQueue.main.async {
                     self.collectionView?.reloadData()
+                    // scroll to the last index
+                    let indexPath = IndexPath(item: self.messages.count - 1, section: 0)
+                    self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
                 }
                 
             }, withCancel: { (error) in
@@ -137,33 +149,14 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     // MARK: - handlers
     
     func handleSend() {
-        guard let ref = ref, let text = inputTextField.text, !text.isEmpty else {
-            print("error: unexpected nil for ref: FIRDatabaseReference")
+        guard let text = inputTextField.text, !text.isEmpty else {
+            print("error: unable to fetch text from user input!")
             return
         }
-        let fromUid = FIRAuth.auth()?.currentUser?.uid ?? ""
-        let toUid = chatPartner?.id ?? ""
-        let messagesChildRef = ref.child("messages").childByAutoId()
-        let timestamp = String(NSDate().timeIntervalSince1970)
-        let values = ["text": text, "fromUid": fromUid, "toUid": toUid, "timestamp": timestamp]
-
-        messagesChildRef.updateChildValues(values) { (error, ref) in
-            if let error = error {
-                print("error: \(error.localizedDescription)")
-                return
-            }
-            let messageId = messagesChildRef.key
-            
-            let userMessagesRef = self.ref?.child("user-messages").child(fromUid).child(toUid)
-            userMessagesRef?.updateChildValues([messageId: 1])
-            
-            let recipientUserMessageRef = self.ref?.child("user-messages").child(toUid).child(fromUid)
-            recipientUserMessageRef?.updateChildValues([messageId: 1])
-        }
+        let properties: [String: Any] = ["text": text]
+        sendMessage(withProperties: properties)
         inputTextField.text = nil
     }
-    
-    
     
     func handleUploadImage() {
         let imagePickerController = UIImagePickerController()
@@ -205,13 +198,19 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
                 }
                 if let imageUrl = metadata?.downloadURL()?.absoluteString {
                     
-                    self.sendMessage(withImageUrl: imageUrl)
+                    self.sendMessage(withImageUrl: imageUrl, image: image)
                 }
             })
         }
     }
     
-    func sendMessage(withImageUrl imageUrl: String) {
+    func sendMessage(withImageUrl imageUrl: String, image: UIImage) {
+        let properties: [String: Any] = ["imageUrl": imageUrl, "imageWidth": image.size.width, "imageHeight": image.size.height]
+
+        sendMessage(withProperties: properties)
+    }
+    
+    private func sendMessage(withProperties properties: [String: Any]) {
         guard let ref = ref else {
             print("error: unexpected nil for ref: FIRDatabaseReference")
             return
@@ -219,8 +218,10 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         let fromUid = FIRAuth.auth()?.currentUser?.uid ?? ""
         let toUid = chatPartner?.id ?? ""
         let messagesChildRef = ref.child("messages").childByAutoId()
-        let timestamp = String(NSDate().timeIntervalSince1970)
-        let values = ["imageUrl": imageUrl, "fromUid": fromUid, "toUid": toUid, "timestamp": timestamp]
+        var values: [String: Any] = ["fromUid": fromUid, "toUid": toUid, "timestamp": NSDate().timeIntervalSince1970]
+        properties.forEach { (dic: (key: String, value: Any)) in
+            values[dic.key] = dic.value
+        }
         
         messagesChildRef.updateChildValues(values) { (error, ref) in
             if let error = error {
@@ -235,7 +236,6 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
             let recipientUserMessageRef = self.ref?.child("user-messages").child(toUid).child(fromUid)
             recipientUserMessageRef?.updateChildValues([messageId: 1])
         }
-        
     }
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
@@ -252,8 +252,10 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         
         cell.message = messages[indexPath.item]
         cell.chatPartner = chatPartner
-        if let text = messages[indexPath.item].text {
+        if let text = cell.message?.text {
             cell.bubbleViewWidthAnchor?.constant = estimatedFrame(forText: text).width + 32
+        } else if cell.message?.imageUrl != nil {
+            cell.bubbleViewWidthAnchor?.constant = 200
         }
         
         return cell
@@ -264,13 +266,19 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
-        guard let text = messages[indexPath.item].text else {
-            print("error: unable to get messages' text!")
-            return CGSize(width: view.frame.width, height: 80)
-        }
-        let height = estimatedFrame(forText: text).height + 20
+        var height: CGFloat = 80
         let width = UIScreen.main.bounds.width
+        
+        let message = messages[indexPath.item]
+        if let text = message.text {
+            height = estimatedFrame(forText: text).height + 20
+        } else if let imageWidth = message.imageWidth, let imageHeight = message.imageHeight {
+            height = CGFloat(imageHeight * 200 / imageWidth)
+            
+            // height/200 = imageheight/ imagewidth
+            // height * imagewidth = 200 * imageheight
+            // height = 200 * imageheight / imagewidth
+        }
         return CGSize(width: width, height: height)
     }
     

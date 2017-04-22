@@ -102,8 +102,8 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
                 print("error: unable to fetch message!")
                 return
             }
-            let message = Message()
-            message.setValuesForKeys(dictionary)
+            let message = Message(dictionary: dictionary)
+            message.id = snapshot.key
             
             if let chatPartnerId = message.chatPartnerId() {
                 self.messagesDictionary[chatPartnerId] = message
@@ -130,10 +130,10 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         
         self.messages = Array(self.messagesDictionary.values)
         self.messages.sort(by: { (m1, m2) -> Bool in
-            guard let t1 = m1.timestamp, let timestamp1 = Double(t1), let t2 = m2.timestamp, let timestamp2 = Double(t2) else {
+            guard let t1 = m1.timestamp, let t2 = m2.timestamp else {
                 return false
             }
-            return timestamp1 > timestamp2
+            return t1 > t2
         })
         
         DispatchQueue.main.async {

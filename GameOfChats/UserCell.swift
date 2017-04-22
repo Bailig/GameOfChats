@@ -16,8 +16,8 @@ class UserCell: UITableViewCell {
         didSet {
             setupNameAndProfileImage()
             detailTextLabel?.text = message?.text
-            if let timestampString = message?.timestamp, let timestampDouble = Double(timestampString) {
-                let timestampDate = Date(timeIntervalSince1970: timestampDouble)
+            if let timestamp = message?.timestamp {
+                let timestampDate = Date(timeIntervalSince1970: timestamp)
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "hh:mm:ss a"
                 timeLabel.text = dateFormatter.string(from: timestampDate)
