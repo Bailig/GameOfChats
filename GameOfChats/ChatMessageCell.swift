@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import AVFoundation
 
 protocol ChatMessageCellDelegate {
     func preformZoomIn(forStartingImageView imageView: UIImageView)
@@ -56,7 +57,6 @@ class ChatMessageCell: UICollectionViewCell {
             }
         }
     }
-
     
     let profileImageView: UIImageView = {
         let iv = UIImageView()
@@ -95,7 +95,42 @@ class ChatMessageCell: UICollectionViewCell {
         return iv
     }()
     
+    let activityIndicatorView: UIActivityIndicatorView = {
+        let aiv = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.white)
+        aiv.translatesAutoresizingMaskIntoConstraints = false
+        return aiv
+    }()
+
+    lazy var playButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = UIColor.white
+        button.setImage(UIImage(named: "play"), for: .normal)
+        button.isHidden = true
+        
+        button.addTarget(self, action: #selector(handlePlay), for: .touchUpInside)
+        return button
+    }()
+    
+    var playerLayer: AVPlayerLayer?
+    var player: AVPlayer?
+    
+    func handlePlay() {
+        if let videoUrlString = message?.videoUrl, let url = URL(string: videoUrlString) {
+            player = AVPlayer(url: url)
+            playerLayer = AVPlayerLayer(player: player)
+            playerLayer?.frame = bubbleView.bounds
+            if let playerLayer = playerLayer {
+                bubbleView.layer.addSublayer(playerLayer)
+                player?.play()
+                activityIndicatorView.startAnimating()
+                playButton.isHidden = true
+            }
+        }
+    }
+    
     func handleImageTap(_ tapGesture: UITapGestureRecognizer) {
+        guard message?.videoUrl == nil else { return }
         guard let imageView = tapGesture.view as? UIImageView else {
             print("error: unable to fetch a UIImageView from tapGesture!")
             return
@@ -140,11 +175,31 @@ class ChatMessageCell: UICollectionViewCell {
         messageImageView.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor).isActive = true
         messageImageView.leftAnchor.constraint(equalTo: bubbleView.leftAnchor).isActive = true
         messageImageView.rightAnchor.constraint(equalTo: bubbleView.rightAnchor).isActive = true
+        
+        bubbleView.addSubview(playButton)
+        playButton.topAnchor.constraint(equalTo: messageImageView.topAnchor).isActive = true
+        playButton.rightAnchor.constraint(equalTo: messageImageView.rightAnchor).isActive = true
+        playButton.bottomAnchor.constraint(equalTo: messageImageView.bottomAnchor).isActive = true
+        playButton.leftAnchor.constraint(equalTo: messageImageView.leftAnchor).isActive = true
+        
+        bubbleView.addSubview(activityIndicatorView)
+        activityIndicatorView.topAnchor.constraint(equalTo: messageImageView.topAnchor).isActive = true
+        activityIndicatorView.rightAnchor.constraint(equalTo: messageImageView.rightAnchor).isActive = true
+        activityIndicatorView.bottomAnchor.constraint(equalTo: messageImageView.bottomAnchor).isActive = true
+        activityIndicatorView.leftAnchor.constraint(equalTo: messageImageView.leftAnchor).isActive = true
+        
 
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        playerLayer?.removeFromSuperlayer()
+        player?.pause()
+        activityIndicatorView.stopAnimating()
     }
     
 }

@@ -29,6 +29,9 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         checkIfUserIsLogedIn()
         
         tableView.register(UserCell.self, forCellReuseIdentifier: cellId)
+        
+        // for view the delete button
+        tableView.allowsMultipleSelectionDuringEditing = true
     }
     
     
@@ -87,6 +90,15 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
             }, withCancel: { (error) in
                 print("error: \(error.localizedDescription)")
             })
+            
+        }, withCancel: { (error) in
+            print("error: \(error.localizedDescription)")
+        })
+        
+        userMessageRef?.observe(.childRemoved, with: { (snapshot) in
+            
+            self.messagesDictionary.removeValue(forKey: snapshot.key)
+            self.attemptReloadOfTable()
             
         }, withCancel: { (error) in
             print("error: \(error.localizedDescription)")
@@ -239,7 +251,7 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as? UserCell else {
-            print("error: unavle to dequeue reusable cell with identifier \(cellId)")
+            print("error: unable to dequeue reusable cell with identifier \(cellId)")
             return UITableViewCell()
         }
         
@@ -259,6 +271,31 @@ class MessagesController: UITableViewController, LoginControllerDelegate, NewMes
         return 72
     }
     
+    // MARK: - delete button
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        guard let ref = ref, let uid = FIRAuth.auth()?.currentUser?.uid else {
+            print("error: unable to fetch current user id!")
+            return
+        }
+        guard let chatPartnerId = messages[indexPath.row].chatPartnerId() else {
+            print("error: unable to get chat partner id!")
+            return
+        }
+        ref.child("user-messages").child(uid).child(chatPartnerId).removeValue { (error, ref) in
+            if let error = error {
+                print("error: \(error.localizedDescription)")
+                return
+            }
+            self.messagesDictionary.removeValue(forKey: chatPartnerId)
+            self.attemptReloadOfTable()
+        }
+        
+        
+    }
     
 }
 

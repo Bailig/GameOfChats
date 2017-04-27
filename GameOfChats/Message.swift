@@ -19,6 +19,7 @@ class Message: NSObject {
     var timestamp: Double?
     var imageWidth: Float?
     var imageHeight: Float?
+    var videoUrl: String?
     
     convenience init(dictionary: [String: Any]) {
         self.init()
@@ -30,6 +31,7 @@ class Message: NSObject {
         timestamp = dictionary["timestamp"] as? Double
         imageWidth = dictionary["imageWidth"] as? Float
         imageHeight = dictionary["imageHeight"] as? Float
+        videoUrl = dictionary["videoUrl"] as? String
     }
     
     func chatPartnerId() -> String? {

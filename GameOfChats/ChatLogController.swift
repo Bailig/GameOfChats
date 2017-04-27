@@ -11,7 +11,7 @@ import Firebase
 import MobileCoreServices
 import AVFoundation
 
-class ChatLogController: UICollectionViewController, UITextFieldDelegate, UICollectionViewDelegateFlowLayout, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ChatLogController: UICollectionViewController, UITextFieldDelegate, UICollectionViewDelegateFlowLayout, UIImagePickerControllerDelegate, UINavigationControllerDelegate, ChatInputContainerViewDelegate {
     
     var ref: FIRDatabaseReference?
     var chatPartner: User? {
@@ -26,7 +26,6 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     var imageZoomStartingFrame: CGRect?
     var imageZoomBlackBackgroundView: UIView?
     
-    
     // MARK: - view did load
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,13 +39,13 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .interactive
         
-        setupKeyBoardObserver()
+        setupKeyboardObserver()
     }
     
-    func setupKeyBoardObserver() {
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyBoardDidShow), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
+    func setupKeyboardObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardDidShow), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
     }
-    func handleKeyBoardDidShow() {
+    func handleKeyboardDidShow() {
         guard messages.count > 0 else { return }
         let indexPath = IndexPath(item: messages.count - 1, section: 0)
         collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
@@ -89,56 +88,12 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     
     
     // MARK: - setup UI
-    lazy var inputTextField: UITextField = {
-        let inputTextField = UITextField()
-        inputTextField.translatesAutoresizingMaskIntoConstraints = false
-        inputTextField.placeholder = "Enter message..."
-        inputTextField.delegate = self
-        return inputTextField
-    }()
     
-    lazy var inputsContainerView: UIView = {
-        let containerView = UIView()
-        containerView.backgroundColor = UIColor.white
-        containerView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50)
+    lazy var inputsContainerView: ChatInputContainerView = {
         
-        let uploadImageView = UIImageView()
-        uploadImageView.translatesAutoresizingMaskIntoConstraints = false
-        uploadImageView.image = UIImage(named: "upload_image_icon")
-        uploadImageView.isUserInteractionEnabled = true
-        uploadImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleUpload)))
-        containerView.addSubview(uploadImageView)
-        uploadImageView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
-        uploadImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        uploadImageView.widthAnchor.constraint(equalToConstant: 44).isActive = true
-        uploadImageView.heightAnchor.constraint(equalToConstant: 44).isActive = true
-        
-        let sendButton = UIButton(type: .system)
-        sendButton.translatesAutoresizingMaskIntoConstraints = false
-        sendButton.setTitle("Send", for: .normal)
-        sendButton.addTarget(self, action: #selector(self.handleSend), for: .touchUpInside)
-        containerView.addSubview(sendButton)
-        sendButton.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
-        sendButton.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
-        sendButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
-        sendButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
-
-        containerView.addSubview(self.inputTextField)
-        self.inputTextField.leftAnchor.constraint(equalTo: uploadImageView.rightAnchor, constant: 8).isActive = true
-        self.inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor, constant: 16).isActive = true
-        self.inputTextField.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
-        self.inputTextField.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
-        
-        let separatorLineView = UIView()
-        separatorLineView.translatesAutoresizingMaskIntoConstraints = false
-        separatorLineView.backgroundColor = UIColor(r: 220, g: 220, b: 220)
-        containerView.addSubview(separatorLineView)
-        separatorLineView.heightAnchor.constraint(equalToConstant: 1).isActive = true
-        separatorLineView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
-        separatorLineView.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
-        separatorLineView.bottomAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
-        
-        return containerView
+        let chatInputContaineView = ChatInputContainerView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50))
+        chatInputContaineView.delegate = self
+        return chatInputContaineView
     }()
     
     override var inputAccessoryView: UIView? {
@@ -153,13 +108,13 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     // MARK: - handlers
     
     func handleSend() {
-        guard let text = inputTextField.text, !text.isEmpty else {
+        guard let text = inputsContainerView.inputTextField.text, !text.isEmpty else {
             print("error: unable to fetch text from user input!")
             return
         }
         let properties: [String: Any] = ["text": text]
         sendMessage(withProperties: properties)
-        inputTextField.text = nil
+        inputsContainerView.inputTextField.text = nil
     }
     
     func handleUpload() {
@@ -313,6 +268,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
             cell.textView.isHidden = true
         }
         
+        cell.playButton.isHidden = cell.message?.videoUrl == nil
         return cell
     }
     
@@ -386,11 +342,6 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     
     
     // MARK: - others
-    // calls handleSend() method when enter key pressed
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        handleSend()
-        return true
-    }
     
     // this method will be call every time we rotate the device.
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
